@@ -1,5 +1,8 @@
+/* eslint-disable prettier/prettier */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { PedidosController } from './pedidos.controller';
+import { PedidosService } from './pedidos.service';
 
 describe('PedidosController', () => {
   let controller: PedidosController;
@@ -7,6 +10,7 @@ describe('PedidosController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PedidosController],
+      providers: [PedidosService],
     }).compile();
 
     controller = module.get<PedidosController>(PedidosController);
