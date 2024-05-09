@@ -11,6 +11,7 @@ exports.getAllPedidosByStatus = async () => {
 };
  
 exports.createPedido = async (pedido) => {
+  pedido.orderStatus = "RECEBIDO"
   return await PedidoModel.create(pedido);
 };
 
@@ -30,5 +31,3 @@ exports.updatePedido = async (id, pedido) => {
 exports.deletePedido = async (id) => {
   return await PedidoModel.findByIdAndDelete(id);
 };
-
-

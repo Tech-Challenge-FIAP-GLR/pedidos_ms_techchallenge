@@ -20,8 +20,12 @@ exports.getAllPedidosByStatus = async (req, res) => {
  
 exports.createPedido = async (req, res) => {
   try {
-    const blog = await pedidoService.createPedido(req.body);
-    res.json({ data: blog, status: "success" });
+    const pedido = await pedidoService.createPedido(req.body);
+    const response = {
+      id: pedido._id,
+      total: pedido.total
+    }
+    res.json({ data: response, status: "success" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -29,8 +33,12 @@ exports.createPedido = async (req, res) => {
  
 exports.getPedidoById = async (req, res) => {
   try {
-    const blog = await pedidoService.getPedidoById(req.params.id);
-    res.json({ data: blog, status: "success" });
+    const pedido = await pedidoService.getPedidoById(req.params.id);
+    if(pedido === null) {
+      res.json({  message: 'Este Pedido não existe mais'});
+    } else {
+      res.json({ data: pedido, status: "success" });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -38,8 +46,8 @@ exports.getPedidoById = async (req, res) => {
 
 exports.getPedidoByStatus = async (req, res) => {
   try {
-    const blog = await pedidoService.getPedidoByStatus(req.params.status);
-    res.json({ data: blog, status: "success" });
+    const pedido = await pedidoService.getPedidoByStatus(req.params.status);
+    res.json({ data: pedido, status: "success" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -47,8 +55,15 @@ exports.getPedidoByStatus = async (req, res) => {
  
 exports.updatePedido = async (req, res) => {
   try {
-    const blog = await pedidoService.updatePedido(req.params.id, req.body);
-    res.json({ data: blog, status: "success" });
+    const atualizaStatus =  {
+     orderStatus: req.body.orderStatus
+    }
+    const pedido = await pedidoService.updatePedido(req.params.id, atualizaStatus);
+    if(pedido === null) {
+      res.json({  message: 'Este Pedido não existe mais'});
+    } else {
+      res.json({  message: 'Pedido atualizado com sucesso', status: "success" });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -56,8 +71,12 @@ exports.updatePedido = async (req, res) => {
  
 exports.deletePedido = async (req, res) => {
   try {
-    const blog = await pedidoService.deletePedido(req.params.id);
-    res.json({ data: blog, status: "success" });
+    const pedido = await pedidoService.deletePedido(req.params.id);
+    if(pedido === null) {
+      res.json({  message: 'Pedido já foi deletado'});
+    } else {
+      res.json({  message: 'Pedido deletado com sucesso', status: "success" });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

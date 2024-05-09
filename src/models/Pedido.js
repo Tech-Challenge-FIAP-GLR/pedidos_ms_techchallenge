@@ -13,10 +13,7 @@ const produtoSchema = new Schema({
 })
  
 const pedidoSchema = new Schema({
-  id: {
-    type: Number,
-    default: 0,
-  },
+  id: String,
   user: {
     id: Number,
     nome: String,
@@ -29,7 +26,18 @@ const pedidoSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  produtos: [produtoSchema]
+  produtos: [produtoSchema],
+},{
+  toJSON: {
+    virtuals: true,
+    transform(doc, ret) {
+        delete ret.__v
+         ret.produtos.map(v => delete v._id)
+        delete ret.password
+        ret.id = ret._id
+        delete ret._id
+    }
+  }
 });
  
 module.exports = mongoose.model("Pedido", pedidoSchema);
