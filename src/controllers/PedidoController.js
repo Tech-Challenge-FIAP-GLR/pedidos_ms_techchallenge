@@ -23,7 +23,8 @@ exports.createPedido = async (req, res) => {
     const pedido = await pedidoService.createPedido(req.body);
     const response = {
       id: pedido._id,
-      total: pedido.total
+      total: pedido.total,
+      orderStatus: pedido.orderStatus
     }
     res.json({ data: response, status: "success" });
   } catch (err) {

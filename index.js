@@ -23,7 +23,7 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs))
 
 //configure mongoose
 mongoose.connect(
-  process.env.MONGODB_URI || "mongodb://localhost:27017/CRUD",
+  process.env.MONGODB_URI || "mongodb://localhost:27017/PEDIDOS",
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
