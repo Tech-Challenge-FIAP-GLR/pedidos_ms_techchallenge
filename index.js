@@ -2,10 +2,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUI = require("swagger-ui-express");
-const pedidoRouter = require("./src/routes/PedidoRoutes");
+const pedidoRouter = require("../pedidos_ms_techchallenge/src/routes/PedidoRoutes");
 
 const PORT = process.env.PORT || 3000;
 const app = express();
+require("dotenv").config();
 
 const swaggeOptions = {
   swaggerDefinition: {
