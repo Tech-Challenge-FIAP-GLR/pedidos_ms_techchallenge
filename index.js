@@ -9,14 +9,15 @@ const app = express();
 require("dotenv").config();
 
 const swaggeOptions = {
-  swaggerDefinition: {
+  definition: {
+    openapi: '3.0.0', // Especificação OpenAPI utilizada
     info: {
-      title: 'pedidos_ms_techchallenge',
+      title: 'pedidos_ms_techchallenge', // Título da documentação
+      version: '1.0.0', // Versão da API
       description: 'Pedidos Microsserviço Food TechChallenge',
-      version: '1.0.0'
-    }
+    },
   },
-  apis: ['../src/routes/*.js']
+  apis: ['../pedidos_ms_techchallenge/src/routes/PedidoRoutes.js']
 }
 
 const swaggerDocs = swaggerJsDoc(swaggeOptions);
@@ -24,19 +25,12 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs))
 
 //configure mongoose
 mongoose.connect(
-  process.env.MONGODB_URI || "mongodb://localhost:27017/PEDIDOS",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  },
-  (err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("Connected to MongoDB");
-    }
-  }
-);
+  "mongodb://mongodb:27017/pedidosdb",).then(() => {
+    console.log("Successfully connected to the DB");
+  })
+  .catch((e) => {
+    console.log('erro', e);
+  });
 
 app.use(express.json());
 app.use("/api/pedidos", pedidoRouter);
