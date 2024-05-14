@@ -1,5 +1,5 @@
 const PedidoModel = require("../models/Pedido");
- 
+ // recebido cancelado pago aguardandoPreparo emPreparo pronto
 exports.getAllPedidos = async () => {
   return await PedidoModel.find();
 };
@@ -12,7 +12,7 @@ exports.getAllPedidosByStatus = async () => {
  
 exports.createPedido = async (pedido) => {
   pedido.orderStatus = "RECEBIDO"
-  return await PedidoModel.create(pedido);
+ return await PedidoModel.create(pedido); 
 };
 
 exports.getPedidoById = async (id) => {
@@ -25,7 +25,12 @@ exports.getPedidoByStatus = async (status) => {
 };
  
 exports.updatePedido = async (id, pedido) => {
-  return await PedidoModel.findByIdAndUpdate(id, pedido);
+  const status = pedido.orderStatus.toUpperCase()
+  if(status === 'CANCELADO'){
+    return await PedidoModel.findByIdAndDelete(id);
+  } else {
+    return await PedidoModel.findByIdAndUpdate(id, pedido);
+  }
 };
  
 exports.deletePedido = async (id) => {

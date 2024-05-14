@@ -10,10 +10,10 @@ require("dotenv").config();
 
 const swaggeOptions = {
   definition: {
-    openapi: '3.0.0', // Especificação OpenAPI utilizada
+    openapi: '3.0.0',
     info: {
-      title: 'pedidos_ms_techchallenge', // Título da documentação
-      version: '1.0.0', // Versão da API
+      title: 'pedidos_ms_techchallenge',
+      version: '1.0.0',
       description: 'Pedidos Microsserviço Food TechChallenge',
     },
   },
