@@ -7,7 +7,7 @@ const { expect } = require('jest');
 const request = supertest(app); // Create a request agent using supertest
 
 beforeAll(async () => {
-  await mongoose.connect('mongodb://localhost:27017/testDB', {
+  await mongoose.connect('mongodb://localhost:27018/pedidosdb', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });

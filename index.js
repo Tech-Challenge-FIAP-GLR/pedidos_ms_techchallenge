@@ -25,7 +25,7 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs))
 
 //configure mongoose
 mongoose.connect(
-  "mongodb://mongodb:27017/pedidosdb",).then(() => {
+  "mongodb://mongodb:27018/pedidosdb",).then(() => {
     console.log("Successfully connected to the DB");
   })
   .catch((e) => {
