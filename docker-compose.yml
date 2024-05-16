@@ -3,6 +3,9 @@ version: "3.7"
 volumes:
   db:
 
+networks:
+  rede:
+
 services:
   mongodb:
     image: mongo:latest
@@ -11,6 +14,8 @@ services:
       - "27018:27018"
     volumes:
       - db:/data/db
+    networks:
+      - rede
   
   pedidos-ms-app:
     depends_on:
@@ -19,3 +24,36 @@ services:
     restart: always
     ports:
       - "3000:3000"
+    networks:
+      - rede
+  
+  mysqldb-pagamentos:
+    image: 'mysql:8.0'
+    container_name: 'container_db_pagamentos'
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_DATABASE=techchallenge_pagamentos
+      - MYSQL_PASSWORD=170593
+      - MYSQL_ROOT_PASSWORD=170593
+    networks:
+      - rede
+    volumes:
+      - ~/mysql/mysql:/var/lib/mysql
+
+  spring-app:
+    image: "lucasax/pagamentos_ms_techchallenge:latest"
+    restart: on-failure
+    ports:
+      - 8181:8181
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb-pagamentos:3306/techchallenge_pagamentos?createDatabaseIfNotExist=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&enabledTLSProtocols=TLSv1,TLSv1.1,TLSv1.2
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 170593
+    networks:
+      - rede
+    depends_on:
+      - mysqldb-pagamentos
+      - pedidos-ms-app
+    volumes:
+      - .m2:/root/.m2
