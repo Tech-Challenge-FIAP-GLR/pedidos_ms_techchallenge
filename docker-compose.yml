@@ -15,7 +15,7 @@ services:
   pedidos-ms-app:
     depends_on:
       - mongodb
-    build: .
+    image: raulima1/pedidos_ms_techchallenge:latest
     restart: always
     ports:
       - "3000:3000"
