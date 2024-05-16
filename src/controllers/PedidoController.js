@@ -96,7 +96,7 @@ function postPagamentosMS(payload){
   console.log('postData', postData)
 
   const options = {
-    hostname: 'spring-app-pagamentos',
+    hostname: 'spring-app',
     port : 8181,
     path: '/api/pagamentos_ms_techchallenge/pagamentos',
     method: 'POST',

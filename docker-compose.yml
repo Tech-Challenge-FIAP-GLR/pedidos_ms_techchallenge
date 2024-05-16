@@ -41,7 +41,7 @@ services:
     volumes:
       - ~/mysql/mysql:/var/lib/mysql
 
-  spring-app-pagamentos:
+  spring-app:
     image: "lucasax/pagamentos_ms_techchallenge:latest"
     restart: on-failure
     ports:
@@ -54,5 +54,6 @@ services:
       - rede
     depends_on:
       - mysqldb-pagamentos
+      - pedidos-ms-app
     volumes:
       - .m2:/root/.m2
