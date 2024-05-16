@@ -24,7 +24,7 @@ jobs:
     # - name: Testes
       # - run: npm test
 
-    - name: name: docker login
+    - name: docker login
       env:
        DOCKER_USER: ${{secrets.DOCKER_USER}}
        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
