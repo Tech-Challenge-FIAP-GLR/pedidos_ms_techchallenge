@@ -16,10 +16,10 @@ jobs:
         node-version: '18'
 
     - name: Install dependencies
-        run: npm ci
+      run: npm ci
 
     - name: Build
-        run: npm run build --if-present
+      run: npm run build --if-present
     
     # - name: Testes
       # - run: npm test
