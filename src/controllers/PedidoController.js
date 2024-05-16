@@ -1,5 +1,6 @@
 const pedidoService = require("../services/PedidoService");
- 
+const http = require('http');
+
 exports.getAllPedidos = async (req, res) => {
   try {
     const pedidos = await pedidoService.getAllPedidos();
@@ -22,16 +23,17 @@ exports.createPedido = async (req, res) => {
   try {
     const pedido = await pedidoService.createPedido(req.body);
     const response = {
-      id: pedido._id,
+      pedidoId: pedido._id,
       total: pedido.total,
     }
-     // chamar API de pagamento passando payload
+    postPagamentosMS(response);
+     
     res.json({ data: response });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
- 
+
 exports.getPedidoById = async (req, res) => {
   try {
     const pedido = await pedidoService.getPedidoById(req.params.id);
@@ -83,3 +85,48 @@ exports.deletePedido = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+function postPagamentosMS(payload){
+  
+  const postData = JSON.stringify({
+    pedidoId: payload.pedidoId,
+    total: payload.total,
+  });
+
+  console.log('postData', postData)
+
+  const options = {
+    hostname: 'localhost',
+    port : 8181,
+    path: '/api/pagamentos_ms_techchallenge/pagamentos',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(postData),
+    },
+  };
+
+  const makePost = () => {
+    let data = '';
+
+    const request = http.request(options, (response) => {
+      response.setEncoding('utf8');
+      response.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      response.on('end', () => {
+        console.log(data);
+      });
+    });
+
+    request.on('error', (error) => {
+      console.error(error);
+    });
+
+    request.write(postData);
+    request.end();
+  };
+  
+  makePost();
+}
