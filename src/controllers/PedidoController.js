@@ -120,10 +120,6 @@ function postPagamentosMS(payload){
       });
     });
 
-    request.on('error', (error) => {
-      console.error(error);
-    });
-
     request.write(postData);
     request.end();
   };

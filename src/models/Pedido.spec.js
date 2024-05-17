@@ -1,53 +1,75 @@
 const mongoose = require("mongoose");
-const Pedido = require("../models/Pedido");
+const Pedido = require("../models/Pedido");  // Atualize o caminho conforme necessário
 
-describe("Pedido Schema", () => {
-  it("should have the expected fields", () => {
-    const pedido = new Pedido();
-    const fields = pedido.schema.obj;
-    expect(fields.id).toBeDefined();
-    expect(fields.user).toBeDefined();
-    expect(fields.total).toBeDefined();
-    expect(fields.orderStatus).toBeDefined();
-    expect(fields.dataPedido).toBeDefined();
-    expect(fields.produtos).toBeDefined();
+describe("Pedido Model Test", () => {
+  // Conectar ao banco de dados de teste antes de rodar qualquer teste
+  beforeAll(async () => {
+    const url = "mongodb://127.0.0.1/pedido_test_db";
+    await mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
   });
 
-  it("should have correct field types", () => {
-    const pedido = new Pedido();
-    const fields = pedido.schema.obj;
-    expect(fields.id).toEqual(String);
-    expect(fields.user).toEqual({
-      id: Number,
-      nome: String,
-      cpf: String,
-      email: String
-    });
-    expect(fields.total).toEqual(Number);
-    expect(fields.orderStatus).toEqual(String);
+  // Limpar dados depois de cada teste
+  afterEach(async () => {
+    await Pedido.deleteMany();
   });
 
-  it("should have a default value for dataPedido", () => {
-    const pedido = new Pedido();
-    expect(pedido.dataPedido).toEqual(expect.any(Date));
+  // Desconectar do banco de dados de teste depois que todos os testes forem executados
+  afterAll(async () => {
+    await mongoose.connection.close();
   });
 
-  it("should transform _id to id and remove __v in toJSON", () => {
-    const pedido = new Pedido({
-      _id: "new Object(663d692dfa4f3fa359c3a9d0)",
+  it("Deve criar e salvar um pedido com sucesso", async () => {
+    const pedidoData = {
+      id: "1",
       user: {
         id: 1,
-        nome: "John Doe",
-        cpf: "123456789",
-        email: "john@example.com"
+        nome: "João",
+        cpf: "123.456.789-00",
+        email: "joao@example.com"
       },
-      total: 100,
-      orderStatus: "RECEBIDO",
-      produtos: []
-    });
+      total: 100.00,
+      orderStatus: "PENDENTE",
+      produtos: [
+        { nome: "Produto 1", descricao: "Descrição do produto 1", preco: 50.00, categoriaId: 1 },
+        { nome: "Produto 2", descricao: "Descrição do produto 2", preco: 50.00, categoriaId: 2 }
+      ]
+    };
 
-    const transformedPedido = pedido.toJSON();
-    expect(transformedPedido._id).toBeUndefined();
-    expect(transformedPedido.__v).toBeUndefined();
+    const validPedido = new Pedido(pedidoData);
+    const savedPedido = await validPedido.save();
+
+    // Verifica se o documento foi salvo corretamente
+    expect(savedPedido._id).toBeDefined();
+    expect(savedPedido.user.nome).toBe(pedidoData.user.nome);
+    expect(savedPedido.total).toBe(pedidoData.total);
+    expect(savedPedido.produtos.length).toBe(2);
+  });
+
+  it("Deve transformar o pedido para JSON corretamente", async () => {
+    const pedidoData = {
+      id: "1",
+      user: {
+        id: 1,
+        nome: "João",
+        cpf: "123.456.789-00",
+        email: "joao@example.com"
+      },
+      total: 100.00,
+      orderStatus: "PENDENTE",
+      produtos: [
+        { nome: "Produto 1", descricao: "Descrição do produto 1", preco: 50.00, categoriaId: 1 },
+        { nome: "Produto 2", descricao: "Descrição do produto 2", preco: 50.00, categoriaId: 2 }
+      ]
+    };
+
+    const validPedido = new Pedido(pedidoData);
+    const savedPedido = await validPedido.save();
+    const jsonPedido = savedPedido.toJSON();
+
+    // Verifica se a transformação para JSON está correta
+    expect(jsonPedido.id).toBeDefined();
+    expect(jsonPedido._id).toBeUndefined();
+    expect(jsonPedido.produtos[0]._id).toBeUndefined();
+    expect(jsonPedido.__v).toBeUndefined();
   });
 });

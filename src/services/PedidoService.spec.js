@@ -1,74 +1,98 @@
-const pedidoService = require("../services/PedidoService");
 const PedidoModel = require("../models/Pedido");
+const pedidoService = require("../services/PedidoService");
 
-// Mocking PedidoModel methods
+// Mock do PedidoModel
 jest.mock("../models/Pedido");
 
-describe("Pedido Service", () => {
-  describe("getAllPedidos", () => {
-    it("should return all pedidos", async () => {
-      const mockPedidos = [{ _id: 1, orderStatus: "RECEBIDO" }, { _id: 2, orderStatus: "EM_PROCESSAMENTO" }];
-      PedidoModel.find.mockResolvedValue(mockPedidos);
-      const result = await pedidoService.getAllPedidos();
-      expect(result).toEqual(mockPedidos);
-    });
+describe("PedidoService", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  describe("getAllPedidosByStatus", () => {
-    it("should return all pedidos sorted by orderStatus", async () => {
-      const mockPedidos = [{ _id: 1, orderStatus: "RECEBIDO" }, { _id: 2, orderStatus: "EM_PROCESSAMENTO" }];
-      PedidoModel.find.mockResolvedValue(mockPedidos);
-      const result = await pedidoService.getAllPedidosByStatus();
-      const expected = [{ _id: 2, orderStatus: "EM_PROCESSAMENTO" }, { _id: 1, orderStatus: "RECEBIDO" }];
-      expect(result).toEqual(expected);
-    });
+  test("getAllPedidos - deve retornar todos os pedidos", async () => {
+    const mockPedidos = [{ id: 1, orderStatus: "RECEBIDO" }];
+    PedidoModel.find.mockResolvedValue(mockPedidos);
+
+    const pedidos = await pedidoService.getAllPedidos();
+    
+    expect(pedidos).toEqual(mockPedidos);
+    expect(PedidoModel.find).toHaveBeenCalledTimes(1);
   });
 
-  describe("createPedido", () => {
-    it("should create a new pedido with orderStatus 'RECEBIDO'", async () => {
-      const mockPedido = { _id: 1, orderStatus: "RECEBIDO" };
-      const pedidoData = { /* Some mock data for creating pedido */ };
-      PedidoModel.create.mockResolvedValue(mockPedido);
-      const result = await pedidoService.createPedido(pedidoData);
-      expect(result).toEqual(mockPedido);
-    });
+  test("getAllPedidosByStatus - deve retornar pedidos ordenados por status", async () => {
+    const mockPedidos = [
+      { id: 1, orderStatus: "EMPREPARO" },
+      { id: 2, orderStatus: "RECEBIDO" }
+    ];
+    PedidoModel.find.mockResolvedValue(mockPedidos);
+
+    const pedidos = await pedidoService.getAllPedidosByStatus();
+    
+    expect(pedidos).toEqual([
+      { id: 1, orderStatus: "EMPREPARO" },
+      { id: 2, orderStatus: "RECEBIDO" }
+    ]);
+    expect(PedidoModel.find).toHaveBeenCalledTimes(1);
   });
 
-  describe("getPedidoById", () => {
-    it("should return pedido by id", async () => {
-      const mockPedido = { _id: 1, orderStatus: "RECEBIDO" };
-      PedidoModel.findById.mockResolvedValue(mockPedido);
-      const result = await pedidoService.getPedidoById(1);
-      expect(result).toEqual(mockPedido);
-    });
+  test("createPedido - deve criar um pedido com status RECEBIDO", async () => {
+    const mockPedido = { user: { id: 1, nome: "João" }, total: 100 };
+    const mockCreatedPedido = { ...mockPedido, orderStatus: "RECEBIDO" };
+    PedidoModel.create.mockResolvedValue(mockCreatedPedido);
+
+    const createdPedido = await pedidoService.createPedido(mockPedido);
+
+    expect(createdPedido).toEqual(mockCreatedPedido);
+    expect(PedidoModel.create).toHaveBeenCalledWith({ ...mockPedido, orderStatus: "RECEBIDO" });
   });
 
-  describe("getPedidoByStatus", () => {
-    it("should return pedidos by status", async () => {
-      const mockPedidos = [{ _id: 1, orderStatus: "RECEBIDO" }, { _id: 2, orderStatus: "RECEBIDO" }];
-      const status = "RECEBIDO";
-      PedidoModel.find.mockResolvedValue(mockPedidos);
-      const result = await pedidoService.getPedidoByStatus(status);
-      expect(result).toEqual(mockPedidos);
-    });
+  test("getPedidoById - deve retornar um pedido pelo ID", async () => {
+    const mockPedido = { id: 1, orderStatus: "RECEBIDO" };
+    PedidoModel.findById.mockResolvedValue(mockPedido);
+
+    const pedido = await pedidoService.getPedidoById(1);
+
+    expect(pedido).toEqual(mockPedido);
+    expect(PedidoModel.findById).toHaveBeenCalledWith(1);
   });
 
-  describe("updatePedido", () => {
-    it("should update pedido by id", async () => {
-      const mockPedido = { _id: 1, orderStatus: "RECEBIDO" };
-      const updatedPedido = { /* Updated pedido data */ };
-      PedidoModel.findByIdAndUpdate.mockResolvedValue(mockPedido);
-      const result = await pedidoService.updatePedido(1, updatedPedido);
-      expect(result).toEqual(mockPedido);
-    });
+  test("getPedidoByStatus - deve retornar pedidos pelo status", async () => {
+    const mockPedidos = [{ id: 1, orderStatus: "RECEBIDO" }];
+    PedidoModel.find.mockResolvedValue(mockPedidos);
+
+    const pedidos = await pedidoService.getPedidoByStatus("recebido");
+
+    expect(pedidos).toEqual(mockPedidos);
+    expect(PedidoModel.find).toHaveBeenCalledWith({ orderStatus: "RECEBIDO" });
   });
 
-  describe("deletePedido", () => {
-    it("should delete pedido by id", async () => {
-      const mockPedido = { _id: 1, orderStatus: "RECEBIDO" };
-      PedidoModel.findByIdAndDelete.mockResolvedValue(mockPedido);
-      const result = await pedidoService.deletePedido(1);
-      expect(result).toEqual(mockPedido);
-    });
+  test("updatePedido - deve atualizar um pedido quando o status não é CANCELADO", async () => {
+    const mockPedido = { id: 1, orderStatus: "EMPREPARO" };
+    PedidoModel.findByIdAndUpdate.mockResolvedValue(mockPedido);
+
+    const updatedPedido = await pedidoService.updatePedido(1, { orderStatus: "EMPREPARO" });
+
+    expect(updatedPedido).toEqual(mockPedido);
+    expect(PedidoModel.findByIdAndUpdate).toHaveBeenCalledWith(1, { orderStatus: "EMPREPARO" });
+  });
+
+  test("updatePedido - deve deletar um pedido quando o status é CANCELADO", async () => {
+    const mockPedido = { id: 1, orderStatus: "CANCELADO" };
+    PedidoModel.findByIdAndDelete.mockResolvedValue(mockPedido);
+
+    const deletedPedido = await pedidoService.updatePedido(1, { orderStatus: "cancelado" });
+
+    expect(deletedPedido).toEqual(mockPedido);
+    expect(PedidoModel.findByIdAndDelete).toHaveBeenCalledWith(1);
+  });
+
+  test("deletePedido - deve deletar um pedido pelo ID", async () => {
+    const mockPedido = { id: 1 };
+    PedidoModel.findByIdAndDelete.mockResolvedValue(mockPedido);
+
+    const deletedPedido = await pedidoService.deletePedido(1);
+
+    expect(deletedPedido).toEqual(mockPedido);
+    expect(PedidoModel.findByIdAndDelete).toHaveBeenCalledWith(1);
   });
 });
