@@ -56,3 +56,16 @@ services:
       - mysqldb-pagamentos
     volumes:
       - .m2:/root/.m2
+  spring-app:
+    build:
+      context: ./
+    image: "pctheone/producao_ms_techchallenge:latest"
+    restart: on-failure
+    ports:
+      - 8080:8080
+    networks:
+      - rede
+    depends_on:
+      - mongodb
+    volumes:
+      - .m2:/root/.m2
