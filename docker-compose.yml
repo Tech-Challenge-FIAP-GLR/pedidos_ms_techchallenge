@@ -56,6 +56,16 @@ services:
       - mysqldb-pagamentos
     volumes:
       - .m2:/root/.m2
+  mongodb:
+    image: 'mongo:latest'
+    container_name: 'container_db'
+    ports:
+      - 27017:27017
+    networks:
+      - rede
+    volumes:
+      - ~/mongo/mongo:/var/lib/mongo
+
   spring-app:
     build:
       context: ./
