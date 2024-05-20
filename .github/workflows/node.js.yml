@@ -28,9 +28,6 @@ jobs:
 
     - name: Build
       run: npm run build --if-present
-    
-    # - name: Testes
-      # - run: npm test
 
     - name: docker login
       env:
