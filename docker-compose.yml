@@ -56,7 +56,7 @@ services:
       - mysqldb-pagamentos
     volumes:
       - .m2:/root/.m2
-  mongodb:
+  mongodb-prod:
     image: 'mongo:latest'
     container_name: 'container_db'
     ports:
@@ -76,6 +76,6 @@ services:
     networks:
       - rede
     depends_on:
-      - mongodb
+      - mongodb-prod
     volumes:
       - .m2:/root/.m2
