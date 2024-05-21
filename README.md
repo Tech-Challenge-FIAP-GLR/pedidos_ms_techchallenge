@@ -16,7 +16,7 @@ Serviço responsável por cuidar dos pedidos do fast food. O serviço é respons
    
 
 ## Swagger
-http://localhost:3000/swagger-ui/index.html
+http://localhost:3000/api-docs/
 
 # Services
 
