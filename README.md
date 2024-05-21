@@ -21,7 +21,7 @@ http://localhost:3000/api-docs/
 # Services
 
 ## Salva Pedido
-**Endpoint:** */api/food_techchallenge/pedidos*<br />
+**Endpoint:** */api/pedidos*<br />
 **Método:** *POST*
 <br />
 **Description:** Método responsável por criar produtos. 
@@ -186,7 +186,7 @@ Path parameter
 }
 ```
 ## Altera Status Pedido (ID)
-**Endpoint:** */api/food_techchallenge/pedidos/${id}*<br />
+**Endpoint:** */api/pedidos/${id}*<br />
 **Método:** *PUT*<br />
 **Description:** Método responsável por avançar o status do pedido desejado, sendo eles. 
 <br />
