@@ -1,5 +1,91 @@
 const pedidoService = require("../services/PedidoService");
 const http = require('http');
+const amqp = require('amqplib');
+
+async function consume() {
+  try {
+    // Conectar ao servidor RabbitMQ com usuário e senha
+    const connection = await amqp.connect({
+      protocol: 'amqp',
+      hostname: 'rabbitmq',
+      port: 5672,
+      username: 'guest',
+      password: 'guest',
+      vhost: '/'
+    });
+
+    // Criar um canal
+    const channel = await connection.createChannel();
+
+    // Nome da fila que você quer consumir
+    const queuePedidosFinalizado = 'producao_ms_pedido_finalizado';
+    const queuePagamentosFail = 'pagamentos_ms_payment_fail';
+    const queuePagamentosSuccess = 'pagamentos_ms_pedido_success';
+
+    // Assegurar que a fila existe
+    await channel.assertQueue(queuePedidosFinalizado, {
+      durable: true
+    });
+
+    await channel.assertQueue(queuePagamentosFail, {
+      durable: true
+    });
+
+    await channel.assertQueue(queuePagamentosSuccess, {
+      durable: true
+    });
+
+    console.log(`[*] Esperando por mensagens na fila: ${queuePedidosFinalizado}. Para sair, pressione CTRL+C`);
+    
+    // Configurar o consumidor
+    channel.consume(queuePedidosFinalizado, (msg) => {
+      console.log(`[x] Recebido: ${msg.content.toString()}`);
+      if (msg !== null) {
+        let objMessage = JSON.parse(msg.content);
+        console.log(`objMessage`, objMessage.data.orderStatus);
+        if(objMessage.data.orderStatus === 'FINALIZADO') {
+          atualizaStatusPorMensagem(objMessage?.data);
+        }
+        channel.ack(msg);
+      }
+    }, {
+      noAck: false
+    });
+
+    channel.consume(queuePagamentosFail, (msg) => {
+      console.log(`[x] Recebido: ${msg.content.toString()}`);
+      if (msg !== null) {
+        let objMessage = JSON.parse(msg.content);
+        console.log(`objMessage`, objMessage.data.orderStatus);
+        if(objMessage.data.orderStatus === 'CANCELADO') {
+          atualizaStatusPorMensagem(objMessage?.data);
+        }
+        channel.ack(msg);
+      }
+    }, {
+      noAck: false
+    });
+
+    channel.consume(queuePagamentosSuccess, (msg) => {
+      console.log(`[x] Recebido: ${msg.content.toString()}`);
+      if (msg !== null) {
+        let objMessage = JSON.parse(msg.content);
+        console.log(`objMessage`, objMessage.data.orderStatus);
+        if(objMessage.data.orderStatus === 'PAGO') {
+          atualizaStatusPorMensagem(objMessage?.data);
+        }
+        channel.ack(msg);
+      }
+    }, {
+      noAck: false
+    });
+
+  } catch (error) {
+    console.error('Erro ao consumir a fila:', error);
+  }
+}
+
+consume();
 
 exports.getAllPedidos = async (req, res) => {
   try {
@@ -125,4 +211,17 @@ function postPagamentosMS(payload){
   };
   
   makePost();
+}
+
+async function atualizaStatusPorMensagem(payload) {
+  console.log(payload,'paylaod')
+  try {
+    const atualizaStatus =  {
+     orderStatus: payload.orderStatus.toUpperCase()
+    }
+    const pedido = await pedidoService.updatePedido(payload.id, atualizaStatus);
+    pedido === null ? res.json({ message: 'Este Pedido não existe mais!' }) : res.json({ message: 'Pedido atualizado com sucesso' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 }
