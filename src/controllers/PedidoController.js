@@ -7,7 +7,7 @@ async function consume() {
     // Conectar ao servidor RabbitMQ com usuário e senha
     const connection = await amqp.connect({
       protocol: 'amqp',
-      hostname: 'localhost',
+      hostname: 'rabbitmq:5672',
       port: 5672,
       username: 'guest',
       password: 'guest',
