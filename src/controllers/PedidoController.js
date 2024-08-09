@@ -7,7 +7,7 @@ async function consume() {
     // Conectar ao servidor RabbitMQ com usuário e senha
     const connection = await amqp.connect({
       protocol: 'amqp',
-      hostname: 'rabbitmq',
+      hostname: 'localhost',
       port: 5672,
       username: 'guest',
       password: 'guest',
@@ -39,12 +39,14 @@ async function consume() {
     
     // Configurar o consumidor
     channel.consume(queuePedidosFinalizado, (msg) => {
-      console.log(`[x] Recebido: ${msg.content.toString()}`);
+      console.log(`[x] Recebido pedido finalizado: ${msg.content.toString()}`);
+      let objMessage = JSON.parse(msg.content);
+      // let objMessage = msg.content.toString();
       if (msg !== null) {
-        let objMessage = JSON.parse(msg.content);
-        console.log(`objMessage`, objMessage.data.orderStatus);
-        if(objMessage.data.orderStatus === 'FINALIZADO') {
-          atualizaStatusPorMensagem(objMessage?.data);
+        console.log(`objMessage`, objMessage.orderStatus);
+        if(objMessage.orderStatus === 'FINALIZADO') {
+          console.log(`mensagem`, objMessage);
+          atualizaStatusPorMensagem(objMessage);
         }
         channel.ack(msg);
       }
@@ -53,12 +55,12 @@ async function consume() {
     });
 
     channel.consume(queuePagamentosFail, (msg) => {
-      console.log(`[x] Recebido: ${msg.content.toString()}`);
+      console.log(`[x] Recebido pagamento falho: ${msg.content.toString()}`);
       if (msg !== null) {
         let objMessage = JSON.parse(msg.content);
-        console.log(`objMessage`, objMessage.data.orderStatus);
-        if(objMessage.data.orderStatus === 'CANCELADO') {
-          atualizaStatusPorMensagem(objMessage?.data);
+        console.log(`objMessage`, objMessage.orderStatus);
+        if(objMessage.orderStatus === 'CANCELADO') {
+          atualizaStatusPorMensagem(objMessage);
         }
         channel.ack(msg);
       }
@@ -67,12 +69,12 @@ async function consume() {
     });
 
     channel.consume(queuePagamentosSuccess, (msg) => {
-      console.log(`[x] Recebido: ${msg.content.toString()}`);
+      console.log(`[x] Recebido pagamento sucesso: ${msg.content.toString()}`);
       if (msg !== null) {
         let objMessage = JSON.parse(msg.content);
-        console.log(`objMessage`, objMessage.data.orderStatus);
-        if(objMessage.data.orderStatus === 'PAGO') {
-          atualizaStatusPorMensagem(objMessage?.data);
+        console.log(`objMessage`, objMessage.orderStatus);
+        if(objMessage.orderStatus === 'PAGO') {
+          atualizaStatusPorMensagem(objMessage);
         }
         channel.ack(msg);
       }
@@ -219,7 +221,7 @@ async function atualizaStatusPorMensagem(payload) {
     const atualizaStatus =  {
      orderStatus: payload.orderStatus.toUpperCase()
     }
-    const pedido = await pedidoService.updatePedido(payload.id, atualizaStatus);
+    const pedido = await pedidoService.updatePedido(payload.pedidoId, atualizaStatus);
     pedido === null ? res.json({ message: 'Este Pedido não existe mais!' }) : res.json({ message: 'Pedido atualizado com sucesso' });
   } catch (err) {
     res.status(500).json({ error: err.message });
